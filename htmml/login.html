@@ -1,0 +1,14 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Login – Emergency Alert System</title>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>:root{--line:#2a434b;--tx:#e8f0f0;--mut:#8fa8ae}*{box-sizing:border-box}
+body{margin:0;min-height:100vh;display:grid;place-items:center;color:var(--tx);font:15px/1.45 "Atkinson Hyperlegible",system-ui,sans-serif;background:radial-gradient(900px 500px at 50% 0,#17404a,transparent),#0b1517}
+form{width:min(380px,92vw);background:#13242acc;border:1px solid var(--line);border-radius:18px;padding:28px;backdrop-filter:blur(8px);box-shadow:0 20px 60px #0008}
+.logo{width:54px;height:54px;border-radius:16px;background:linear-gradient(135deg,#ff5a3c,#ffb020);display:grid;place-items:center;font-size:28px;margin:0 auto 14px;animation:p 2s infinite}@keyframes p{50%{box-shadow:0 0 0 12px #ff5a3c00,0 0 24px #ff5a3c88}}
+h1{font-size:21px;text-align:center;margin:0 0 4px}p{color:var(--mut);text-align:center;margin:0 0 20px;font-size:14px}
+input{width:100%;padding:12px;margin-bottom:12px;border-radius:10px;border:1px solid var(--line);background:#0c1a1e;color:var(--tx);font:inherit}input:focus{outline:2px solid #6fb6ff}
+button{width:100%;padding:12px;border:0;border-radius:10px;background:#4cc9a0;color:#06231a;font:inherit;font-weight:700;cursor:pointer}button:hover{filter:brightness(1.08)}
+.e{display:none;background:#ff5a3c22;color:#ffb3a5;border:1px solid #ff5a3c66;border-radius:8px;padding:8px 12px;margin-bottom:12px;font-size:14px}.e.show{display:block}</style></head>
+<body><form method="post" action="/login"><div class="logo">🚨</div><h1>Emergency Alert System</h1><p>Real-time fire &amp; person-down monitoring</p>
+<div class="e" id="e">Wrong username or password.</div>
+<input name="u" placeholder="Username" autocomplete="username" required autofocus><input name="p" type="password" placeholder="Password" autocomplete="current-password" required><button>Login</button></form>
+<script>if(location.search.includes("err=1"))document.getElementById("e").classList.add("show")</script></body></html>

@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Emergency Alert System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0b1517;--panel:#13242a;--p2:#1a2f36;--line:#2a434b;--tx:#e8f0f0;--mut:#8fa8ae;--ok:#4cc9a0;--fire:#ff5a3c;--down:#c58bff;--info:#6fb6ff;--r:14px;--f:"Atkinson Hyperlegible",system-ui,"Segoe UI",sans-serif}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(1200px 500px at 70% -10%,#143038,transparent),var(--bg);color:var(--tx);font:15px/1.45 var(--f);min-height:100vh}
+button,input,select{font:inherit;color:inherit}:focus-visible{outline:2px solid var(--info);outline-offset:2px}
+header{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:14px 24px;border-bottom:1px solid var(--line);backdrop-filter:blur(6px);position:sticky;top:0;z-index:5;background:#0b1517cc}
+.brand{display:flex;align-items:center;gap:10px;font-size:18px;font-weight:700}.logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--fire),#ffb020);display:grid;place-items:center;font-size:18px}
+.status{display:flex;align-items:center;gap:8px;color:var(--mut);flex:1;min-width:180px}.dot{width:10px;height:10px;border-radius:50%;background:var(--mut);flex:none}
+.status[data-level=ok] .dot{background:var(--ok);animation:blink 1.6s infinite}.status[data-level=error] .dot{background:var(--fire)}.status[data-level=ok] #statusText{color:var(--tx)}.status[data-level=error] #statusText{color:#ffb3a5}
+@keyframes blink{50%{box-shadow:0 0 0 6px #4cc9a000;opacity:.5}}
+.acts{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:var(--p2);border-radius:10px;padding:8px 14px;cursor:pointer;min-height:38px;text-decoration:none;display:inline-flex;align-items:center;transition:.15s}
+.btn:hover{border-color:#4f7380;transform:translateY(-1px)}.btn.primary{background:var(--ok);border-color:var(--ok);color:#06231a;font-weight:700}.btn.danger{background:var(--fire);border-color:var(--fire);color:#2b0800;font-weight:700}.btn.ghost{background:transparent}.btn:disabled{opacity:.5;cursor:not-allowed}[hidden]{display:none!important}
+.wrap{padding:20px 24px 30px;max-width:1500px;margin:auto}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-top:3px solid var(--c);border-radius:var(--r);padding:14px 18px}.kpi span{color:var(--mut);font-size:13px;text-transform:uppercase;letter-spacing:.06em}.kpi b{display:block;font-size:38px;line-height:1.1;font-variant-numeric:tabular-nums}
+.pipe{display:flex;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px 18px;margin-bottom:16px;gap:6px;--hot:var(--fire)}
+.node{display:grid;justify-items:center;text-align:center;gap:2px;padding:8px 12px;border-radius:12px;border:1px solid var(--line);background:var(--p2);min-width:96px;transition:.3s}.node i{font-style:normal;font-size:22px}.node b{font-size:14px}.node small{color:var(--mut);font-size:12px}
+.run .node[data-n=cam],.run .node[data-n=ai]{border-color:var(--ok);box-shadow:0 0 14px #4cc9a033}
+.node.hot{border-color:var(--hot)!important;box-shadow:0 0 22px var(--hot)!important;transform:scale(1.07)}
+.arr{flex:1;min-width:14px;height:3px;border-radius:2px;background:var(--line)}.run .arr{background:repeating-linear-gradient(90deg,var(--ok) 0 8px,transparent 8px 16px);animation:flow .8s linear infinite}@keyframes flow{to{background-position:16px 0}}
+main{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:20px;align-items:start}
+@media(max-width:1000px){main{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}.pipe{overflow-x:auto}header,.wrap{padding-left:14px;padding-right:14px}}
+.stage{position:relative;aspect-ratio:16/9;width:100%;background:#050c0e;border:2px solid var(--line);border-radius:var(--r);overflow:hidden;transition:.2s}
+.stage img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:none}.live .stage img{display:block}.live .stage{border-color:#3a6571}
+.flash-fire{animation:ff 1.4s}.flash-down{animation:fd 1.4s}.flash-test{animation:ft 1.4s}
+@keyframes ff{0%,50%{border-color:var(--fire);box-shadow:0 0 0 5px #ff5a3c55}}@keyframes fd{0%,50%{border-color:var(--down);box-shadow:0 0 0 5px #c58bff55}}@keyframes ft{0%,50%{border-color:var(--info);box-shadow:0 0 0 5px #6fb6ff55}}
+.ph{position:absolute;inset:0;display:grid;place-content:center;text-align:center;padding:24px;color:var(--mut);gap:6px}.ph strong{color:var(--tx);font-size:20px}.live .ph{display:none}
+.chips{position:absolute;left:12px;bottom:12px;display:none;gap:8px}.live .chips{display:flex}.chip{background:#0b1417d9;border:1px solid var(--line);border-radius:99px;padding:3px 11px;font-size:13px;font-variant-numeric:tabular-nums}
+.rec{position:absolute;right:12px;top:12px;display:none;align-items:center;gap:6px;background:#0b1417d9;border-radius:99px;padding:3px 11px;font-size:13px}.live .rec{display:flex}.rec:before{content:"";width:9px;height:9px;border-radius:50%;background:var(--fire);animation:blink 1s infinite}
+.banner{position:absolute;left:0;right:0;top:0;padding:12px 16px;font-weight:700;display:none;color:#1a0f00;z-index:2}.banner.show{display:block;animation:slide .3s}@keyframes slide{from{transform:translateY(-100%)}}
+.banner[data-type=FIRE]{background:var(--fire)}.banner[data-type=POSSIBLE_UNCONSCIOUS]{background:var(--down)}.banner[data-type=TEST]{background:var(--info)}
+#siren{position:fixed;inset:0;pointer-events:none;z-index:50}#siren.go{animation:sir .9s 3}@keyframes sir{50%{box-shadow:inset 0 0 180px 30px var(--c)}}
+details.settings{margin-top:16px;background:var(--panel);border:1px solid var(--line);border-radius:var(--r)}details.settings summary{cursor:pointer;padding:13px 16px;font-weight:700;list-style:none}details.settings summary::-webkit-details-marker{display:none}
+details.settings summary:after{content:"Show";float:right;color:var(--mut);font-weight:400}details.settings[open] summary:after{content:"Hide"}
+.form{padding:4px 16px 16px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 16px}.full{grid-column:1/-1}@media(max-width:640px){.form{grid-template-columns:1fr}}
+label{display:grid;gap:4px;color:var(--mut);font-size:14px}input[type=text],input[type=number],select{background:#0c1a1e;border:1px solid var(--line);border-radius:8px;padding:9px 11px;width:100%}
+.hint{color:var(--mut);font-size:13px;margin:2px 0 0}.check{display:flex;align-items:center;gap:10px;color:var(--tx)}.check input{width:18px;height:18px;accent-color:var(--ok)}.err{color:#ffb3a5;min-height:1.2em;margin:0}
+aside{display:grid;gap:14px;position:sticky;top:78px;max-height:calc(100vh - 96px);grid-template-rows:auto minmax(0,1fr)}@media(max-width:1000px){aside{position:static;max-height:none}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r)}.chart{padding:14px 16px}.chart h2{font-size:15px;margin:0 0 8px;display:flex;justify-content:space-between}.chart small{color:var(--mut);font-weight:400}
+#chart{width:100%;height:80px;display:block}.axis{display:flex;justify-content:space-between;color:var(--mut);font-size:12px}
+.feedbox{display:flex;flex-direction:column;min-height:300px;overflow:hidden}.fh{padding:14px 16px 10px;display:flex;align-items:center;gap:10px}.fh h2{font-size:16px;margin:0;flex:1}
+.count{background:var(--p2);border:1px solid var(--line);border-radius:99px;padding:1px 10px;font-size:13px}
+.filters{display:flex;gap:6px;flex-wrap:wrap;padding:0 16px 12px;border-bottom:1px solid var(--line)}.filter{border:1px solid var(--line);background:transparent;border-radius:99px;padding:4px 12px;cursor:pointer;font-size:13px;color:var(--mut)}
+.filter[aria-pressed=true]{background:var(--tx);color:var(--bg);border-color:var(--tx);font-weight:700}
+.feed{overflow-y:auto;padding:10px;display:grid;gap:10px;align-content:start;flex:1}.empty{color:var(--mut);padding:22px 12px;text-align:center}.empty strong{display:block;color:var(--tx);margin-bottom:4px}
+.alert{--c:var(--info);display:grid;grid-template-columns:96px 1fr;gap:12px;padding:10px;background:var(--p2);border:1px solid var(--line);border-left:5px solid var(--c);border-radius:10px}
+.alert[data-type=FIRE]{--c:var(--fire)}.alert[data-type=POSSIBLE_UNCONSCIOUS]{--c:var(--down)}.alert.new{animation:arr .9s}@keyframes arr{from{background:#2d4f58;transform:translateX(20px);opacity:.3}}
+.thumb{width:96px;height:72px;border-radius:8px;background:#0a1417;border:0;padding:0;overflow:hidden;cursor:zoom-in;display:grid;place-content:center;color:var(--mut);font-size:12px}.thumb img{width:100%;height:100%;object-fit:cover}.thumb.none{cursor:default}
+.alert h3{margin:0;font-size:15px;display:flex;justify-content:space-between;gap:8px}.alert time{color:var(--mut);font-weight:400;font-size:13px;white-space:nowrap}.alert p{margin:3px 0 0;color:#c5d4d6;font-size:13.5px}
+dialog{border:1px solid var(--line);background:var(--panel);color:var(--tx);border-radius:var(--r);padding:12px;max-width:min(92vw,1100px)}dialog::backdrop{background:#000a}dialog img{max-width:100%;max-height:78vh;display:block;border-radius:8px}.row{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px}
+.present details.settings,.present .hp{display:none}.present .kpi b{font-size:54px}.present .kpi span{font-size:15px}.present .wrap{max-width:none}.present main{grid-template-columns:minmax(0,1fr) 440px}.present .node{min-width:120px;padding:12px 16px}.present .node b{font-size:16px}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style></head>
+<body>
+<div id="siren"></div>
+<header>
+ <div class="brand"><div class="logo">🚨</div>Emergency Alert System</div>
+ <div class="status" id="status" data-level="info" role="status"><span class="dot"></span><span id="statusText">Connecting to server…</span></div>
+ <div class="acts">
+  <button class="btn ghost" id="presBtn" title="Presentation mode (P)">⛶ Present</button>
+  <button class="btn ghost" id="soundBtn" aria-pressed="true">Sound on</button>
+  <button class="btn primary" id="startBtn">Start detection</button>
+  <button class="btn danger" id="stopBtn" hidden>Stop</button>
+  <a class="btn ghost" href="/logout">Logout</a>
+ </div>
+</header>
+<div class="wrap" id="app">
+ <div class="kpis">
+  <div class="kpi" style="--c:var(--info)"><span>Total alerts</span><b id="kTot">0</b></div>
+  <div class="kpi" style="--c:var(--fire)"><span>Fire / smoke</span><b id="kFire">0</b></div>
+  <div class="kpi" style="--c:var(--down)"><span>Person down</span><b id="kDown">0</b></div>
+  <div class="kpi" style="--c:var(--ok)"><span>Monitoring time</span><b id="kTime">—</b></div>
+ </div>
+ <div class="pipe" id="pipe">
+  <div class="node" data-n="cam"><i>📷</i><b>Camera</b><small>Live video</small></div><span class="arr"></span>
+  <div class="node" data-n="ai"><i>🧠</i><b>AI detection</b><small>YOLO + flame</small></div><span class="arr"></span>
+  <div class="node" data-n="dec"><i>⚖️</i><b>Decision</b><small>Rules &amp; timers</small></div><span class="arr"></span>
+  <div class="node" data-n="alert"><i>🚨</i><b>Alert</b><small>Snapshot + log</small></div><span class="arr"></span>
+  <div class="node" data-n="phone"><i>📱</i><b>Phone</b><small>ntfy push</small></div>
+ </div>
+ <main>
+  <section>
+   <div class="stage" id="stage">
+    <div class="banner" id="banner" role="alert"></div>
+    <img id="video" alt="Live camera view with detections">
+    <div class="ph"><strong>Camera is off</strong><span>Open settings below, then choose Start detection.</span></div>
+    <div class="rec">LIVE</div>
+    <div class="chips"><span class="chip" id="fpsChip">0 fps</span><span class="chip" id="personChip">0 people</span></div>
+   </div>
+   <details class="settings" id="settings" open><summary>Camera and alert settings</summary>
+    <form class="form" id="form" autocomplete="off">
+     <label class="full">Camera source<input type="text" id="source" value="0" placeholder="rtsp://user:password@192.168.1.50:554/stream" spellcheck="false"><span class="hint">Webcam number (0, 1), RTSP or HTTP stream URL, or a video file path.</span></label>
+     <label>Person model (pose model finds people lying down)<input type="text" id="person_model" value="yolo11n-pose.pt" list="models" spellcheck="false"></label>
+     <label>Alert when a person is lying and still for (seconds)<input type="number" id="down_seconds" value="15" min="3" step="1"></label>
+     <label>Fire and smoke model (optional)<input type="text" id="fire_model" value="models/fire.pt" list="models" spellcheck="false"></label>
+     <label>Confidence (0 to 1)<input type="number" id="confidence" value="0.40" min="0.05" max="1" step="0.05"></label>
+     <label class="check full"><input type="checkbox" id="builtin_fire" checked> Also use the built-in fire detector (flickering flame colour, no model file needed)</label>
+     <label>Alert cooldown (seconds)<input type="number" id="cooldown" value="20" min="1" step="1"></label>
+     <label>Built-in fire detector sensitivity<select id="fire_sensitivity"><option value="low">Low (fewest false alarms)</option><option value="medium" selected>Medium</option><option value="high">High (catches small or dim flames)</option></select></label>
+     <label>ntfy server<input type="text" id="ntfy_server" value="https://ntfy.sh" spellcheck="false"></label>
+     <label>Phone alert topic (your private channel name)<span style="display:flex;gap:8px"><input type="text" id="ntfy_topic" placeholder="Click Generate" spellcheck="false"><button type="button" class="btn" id="genBtn">Generate</button></span>
+      <span class="hint">Install the free <b>ntfy</b> app, tap +, subscribe to exactly this topic. Keep it private.</span></label>
+     <div class="full" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><button type="button" class="btn" id="testBtn">Send test phone alert</button><p class="err" id="formError" role="alert"></p><p class="hint" id="formNote" style="margin:0;color:var(--ok)"></p></div>
+    </form><datalist id="models"></datalist>
+   </details>
+  </section>
+  <aside>
+   <div class="card chart"><h2>Alerts per minute <small>last 10 min</small></h2><svg id="chart" viewBox="0 0 300 80" preserveAspectRatio="none"></svg><div class="axis"><span>10 min ago</span><span>now</span></div></div>
+   <div class="card feedbox">
+    <div class="fh"><h2>Alerts</h2><span class="count" id="count">0</span><button class="btn ghost hp" id="clearBtn" style="min-height:32px;padding:4px 10px">Clear all</button></div>
+    <div class="filters" id="filters"><button class="filter" data-f="ALL" aria-pressed="true">All</button><button class="filter" data-f="FIRE" aria-pressed="false">Fire</button><button class="filter" data-f="POSSIBLE_UNCONSCIOUS" aria-pressed="false">Person down</button></div>
+    <div class="feed" id="feed"></div>
+   </div>
+  </aside>
+ </main>
+</div>
+<dialog id="lightbox"><div class="row"><strong id="lbTitle"></strong><button class="btn" id="lbClose">Close</button></div><img id="lbImg" alt="Alert snapshot"></dialog>
+<script>
+(()=>{const $=i=>document.getElementById(i);
+const FIELDS=["source","person_model","fire_model","fire_sensitivity","down_seconds","confidence","cooldown","ntfy_server","ntfy_topic"],KEY="camera-alerts-settings-v2";
+let since=0,first=true,running=false,sound=true,filter="ALL",runStart=0,ctx=null,bt=null;const alerts=[];
+const COL={FIRE:"var(--fire)",POSSIBLE_UNCONSCIOUS:"var(--down)",TEST:"var(--info)"};
+try{const s=JSON.parse(localStorage.getItem(KEY)||"{}");FIELDS.forEach(k=>{if(s[k]!==undefined)$(k).value=s[k]});if(s.builtin_fire!==undefined)$("builtin_fire").checked=s.builtin_fire;if(s.sound!==undefined)setSound(s.sound)}catch{}
+const read=()=>{const s={};FIELDS.forEach(k=>s[k]=$(k).value.trim());s.builtin_fire=$("builtin_fire").checked;return s};
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify({...read(),sound}))}catch{}};
+const jf=async(u,o)=>{const r=await fetch(u,o);if(r.status===401){location="/login";throw 0}return r};
+const post=(u,b)=>jf(u,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(b||{})});
+jf("/api/models").then(r=>r.json()).then(l=>$("models").replaceChildren(...l.map(m=>Object.assign(document.createElement("option"),{value:m})))).catch(()=>{});
+function setSound(on){sound=on;$("soundBtn").textContent=on?"Sound on":"Sound off";$("soundBtn").setAttribute("aria-pressed",on)}
+function beep(n){if(!sound)return;try{ctx=ctx||new(window.AudioContext||window.webkitAudioContext)();for(let i=0;i<n;i++){const o=ctx.createOscillator(),g=ctx.createGain();o.type="square";o.frequency.value=n>1?980:740;const t=ctx.currentTime+i*.28;g.gain.setValueAtTime(1e-4,t);g.gain.exponentialRampToValueAtTime(.18,t+.02);g.gain.exponentialRampToValueAtTime(1e-4,t+.2);o.connect(g).connect(ctx.destination);o.start(t);o.stop(t+.22)}}catch{}}
+$("soundBtn").onclick=()=>{setSound(!sound);if(sound)beep(1);save()};
+const fmt=t=>new Date(t*1000).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit",second:"2-digit"});
+const el=(t,p={},...k)=>{const e=Object.assign(document.createElement(t),p);k.forEach(x=>e.append(x));return e};
+function num(e,n){const f=+e.dataset.v||0;if(f===n)return;e.dataset.v=n;const t0=performance.now();(function s(t){const p=Math.min(1,(t-t0)/500);e.textContent=Math.round(f+(n-f)*p);if(p<1)requestAnimationFrame(s)})(t0)}
+function kpis(){const real=alerts.filter(a=>a.event!=="TEST");num($("kTot"),real.length);num($("kFire"),real.filter(a=>a.event==="FIRE").length);num($("kDown"),real.filter(a=>a.event==="POSSIBLE_UNCONSCIOUS").length)}
+function clock(){if(!running){$("kTime").textContent="—";return}const s=Math.floor((Date.now()-runStart)/1000),p=n=>String(n).padStart(2,"0");$("kTime").textContent=(s>=3600?Math.floor(s/3600)+":":"")+p(Math.floor(s/60)%60)+":"+p(s%60)}
+function chart(){const B=10,now=Date.now()/1e3,f=Array(B).fill(0),d=Array(B).fill(0);
+ alerts.forEach(a=>{if(a.event==="TEST")return;const i=B-1-Math.floor((now-a.time)/60);if(i>=0&&i<B)(a.event==="FIRE"?f:d)[i]++});
+ const m=Math.max(1,...f.map((v,i)=>v+d[i])),u=70/m;let s="";
+ for(let i=0;i<B;i++){const x=i*30+3,hf=f[i]*u,hd=d[i]*u;s+=`<rect x="${x}" y="78" width="24" height="2" rx="1" fill="#2a434b"/>`;
+  if(hf)s+=`<rect x="${x}" y="${78-hf}" width="24" height="${hf}" rx="3" fill="#ff5a3c"/>`;if(hd)s+=`<rect x="${x}" y="${78-hf-hd}" width="24" height="${hd}" rx="3" fill="#c58bff"/>`}
+ $("chart").innerHTML=s}
+function feed(ids=new Set()){const sh=alerts.filter(a=>filter==="ALL"||a.event===filter);$("count").textContent=alerts.length;
+ if(!sh.length){$("feed").replaceChildren(el("div",{className:"empty"},el("strong",{textContent:alerts.length?"No alerts of this type":"No alerts yet"}),document.createTextNode(alerts.length?"Choose All to see every alert.":"When something is detected, it appears here with a snapshot.")));return}
+ $("feed").replaceChildren(...sh.map(a=>{const th=a.snapshot?el("button",{className:"thumb",type:"button",title:"View snapshot",onclick:()=>lb(a)},el("img",{src:a.snapshot,alt:"Snapshot of "+a.label,loading:"lazy"})):el("div",{className:"thumb none",textContent:"No image"});
+  const c=el("article",{className:"alert"+(ids.has(a.id)?" new":"")},th,el("div",{},el("h3",{},el("span",{textContent:a.label}),el("time",{textContent:fmt(a.time)})),el("p",{textContent:a.message})));c.dataset.type=a.event;return c}))}
+$("filters").addEventListener("click",e=>{const b=e.target.closest(".filter");if(!b)return;filter=b.dataset.f;document.querySelectorAll(".filter").forEach(x=>x.setAttribute("aria-pressed",x===b));feed()});
+$("clearBtn").onclick=async()=>{if(alerts.length&&!confirm("Delete all alerts and their snapshots?"))return;await post("/api/clear");alerts.length=0;feed();kpis();chart()};
+function pulse(ev){$("pipe").style.setProperty("--hot",COL[ev]||COL.TEST);["dec","alert","phone"].forEach((n,i)=>{const e=document.querySelector(`[data-n=${n}]`);setTimeout(()=>{e.classList.add("hot");setTimeout(()=>e.classList.remove("hot"),2200)},i*450)})}
+function announce(a){const st=$("stage"),b=$("banner"),cls={FIRE:"flash-fire",POSSIBLE_UNCONSCIOUS:"flash-down",TEST:"flash-test"}[a.event];
+ st.classList.remove("flash-fire","flash-down","flash-test");void st.offsetWidth;if(cls)st.classList.add(cls);
+ b.dataset.type=a.event;b.textContent=a.label+": "+a.message;b.classList.add("show");clearTimeout(bt);bt=setTimeout(()=>b.classList.remove("show"),7000);
+ if(a.event!=="TEST"){const s=$("siren");s.style.setProperty("--c",COL[a.event]);s.classList.remove("go");void s.offsetWidth;s.classList.add("go")}
+ pulse(a.event);beep(a.event==="TEST"?1:3)}
+function lb(a){$("lbTitle").textContent=a.label+" at "+fmt(a.time);$("lbImg").src=a.snapshot;$("lightbox").showModal()}
+$("lbClose").onclick=()=>$("lightbox").close();$("lightbox").addEventListener("click",e=>{if(e.target===$("lightbox"))$("lightbox").close()});
+const showErr=m=>{$("formError").textContent=m||"";$("formNote").textContent=""};
+$("genBtn").onclick=()=>{const b=crypto.getRandomValues(new Uint8Array(10));$("ntfy_topic").value="cam-alert-"+Array.from(b,x=>x.toString(36).padStart(2,"0")).join("").slice(0,16);save();$("formNote").textContent="Topic created. Subscribe to it in the ntfy app, then send a test alert."};
+$("startBtn").onclick=async()=>{showErr("");save();try{ctx=ctx||new(window.AudioContext||window.webkitAudioContext)();ctx.resume()}catch{}$("startBtn").disabled=true;
+ const r=await post("/api/start",read()),j=await r.json().catch(()=>({}));if(!r.ok){showErr(j.error||"Could not start detection.");$("startBtn").disabled=false;return}$("settings").open=false};
+$("stopBtn").onclick=async()=>{$("stopBtn").disabled=true;await post("/api/stop")};
+$("testBtn").onclick=async()=>{showErr("");$("testBtn").disabled=true;$("formNote").textContent="Sending…";const r=await post("/api/test",read()),j=await r.json().catch(()=>({}));$("testBtn").disabled=false;
+ if(!r.ok)showErr(j.error||"Test failed.");else{save();$("formNote").textContent="Sent. Check your phone; it should arrive within a few seconds."}};
+function present(on){document.body.classList.toggle("present",on);if(on&&!document.fullscreenElement)document.documentElement.requestFullscreen?.().catch(()=>{});if(!on&&document.fullscreenElement)document.exitFullscreen?.();$("presBtn").textContent=on?"✕ Exit":"⛶ Present"}
+$("presBtn").onclick=()=>present(!document.body.classList.contains("present"));
+document.addEventListener("keydown",e=>{if(e.key.toLowerCase()==="p"&&!/INPUT|SELECT|TEXTAREA/.test(e.target.tagName))$("presBtn").click()});
+document.addEventListener("fullscreenchange",()=>{if(!document.fullscreenElement&&document.body.classList.contains("present"))present(false)});
+function setRunning(n){if(n===running)return;running=n;if(n){runStart=Date.now();$("video").src="/video_feed?t="+Date.now()}else $("video").removeAttribute("src");
+ $("app").classList.toggle("live",n);$("pipe").classList.toggle("run",n);$("startBtn").hidden=n;$("startBtn").disabled=false;$("stopBtn").hidden=!n;$("stopBtn").disabled=false;if(!n)$("settings").open=true}
+async function poll(){try{const r=await jf("/api/state?since="+since,{cache:"no-store"}),s=await r.json();
+ $("statusText").textContent=s.status;$("status").dataset.level=s.level;$("fpsChip").textContent=s.fps.toFixed(1)+" fps";$("personChip").textContent=s.persons+(s.persons===1?" person":" people");setRunning(s.running);
+ if(s.alerts.length){const ids=new Set();s.alerts.forEach(a=>{alerts.unshift(a);since=Math.max(since,a.id);ids.add(a.id)});alerts.sort((a,b)=>b.id-a.id);
+  if(!first){announce(s.alerts[s.alerts.length-1]);feed(ids)}else feed();kpis()}else if(first)feed();
+ first=false;chart();clock()}catch(e){if(e!==0){$("statusText").textContent="Cannot reach the server. Is web_app.py still running?";$("status").dataset.level="error"}}
+ setTimeout(poll,1000)}
+poll()})();
+</script></body></html>
